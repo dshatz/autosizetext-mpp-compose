@@ -2,4 +2,4 @@ $dokka.format:html-v1
 $dokka.linkExtension:html
 
 module:lib
-com.inidamleader.ovtracker.util.compose
+com.dshatz.composempp
