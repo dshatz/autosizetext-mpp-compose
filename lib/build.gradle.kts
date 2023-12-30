@@ -1,4 +1,5 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import java.util.*
 
 plugins {
     kotlin("multiplatform")
@@ -77,10 +78,9 @@ android {
 }
 
 mavenPublishing {
-//    publishToMavenCentral(SonatypeHost.DEFAULT)
-    // or when publishing to https://s01.oss.sonatype.org
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
+
     coordinates("com.dshatz.compose-mpp", "autosize-text", "1.0.0")
 
     pom {

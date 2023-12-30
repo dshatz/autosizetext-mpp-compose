@@ -2,8 +2,7 @@ name: Build Multiplatform project
 on:
   push:
     branches:
-      - main
-      - feature/ci_support
+      - release/*
   pull_request:
 
 jobs:
@@ -11,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-12, windows-2022]
+        os: [ubuntu-20.04]
         gradle: [8.3]
     runs-on: ${{ matrix.os }}
     steps:
@@ -22,4 +21,8 @@ jobs:
           java-version: '17'
       - name: Build Multiplatform project
         shell: bash
-        run: ./gradlew assemble
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVENCENTRALPASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVENCENTRALUSERNAME }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNINGINMEMORYKEY }}
+        run: ./gradlew lib:publishAllPublicationsToMavenCentralRepository

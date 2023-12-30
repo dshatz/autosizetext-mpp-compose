@@ -3,13 +3,10 @@ package com.inidamleader.ovtracker.util.compose
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.InternalFoundationTextApi
 import androidx.compose.foundation.text.TextDelegate
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -151,7 +148,7 @@ fun AutoSizeText(
     val density = LocalDensity.current
     // Change font scale to 1F
     CompositionLocalProvider(
-        LocalDensity provides Density(density = density.density, fontScale = 1F)
+        LocalDensity provides Density(density = density.density, fontScale = 1F),
     ) {
         BoxWithConstraints(
             modifier = modifier,
@@ -161,41 +158,47 @@ fun AutoSizeText(
             // it also equals 1F.toSp().value
             val spPerPixel = remember(density) { density.fontScale / density.density }
 
-            val max = remember(maxTextSize, maxWidth, maxHeight) {
-                min(maxWidth, maxHeight).value.let {
-                    if (maxTextSize.isUnspecified) it
-                    else maxTextSize.value.coerceAtMost(maximumValue = it)
-                }
-            }
-
-            val min = remember(minTextSize, spPerPixel, max) {
-                if (minTextSize.isUnspecified) spPerPixel
-                else minTextSize.value.coerceIn(spPerPixel..max)
-            }
-
-            val step = remember(stepGranularityTextSize, spPerPixel, max) {
-                if (stepGranularityTextSize.isUnspecified) spPerPixel
-                else stepGranularityTextSize.value.coerceIn(spPerPixel..max)
-            }
-
-            val candidateFontSizes = remember(suggestedFontSizes, max, min, step) {
-                suggestedFontSizes.value.filter {
-                    it.isSp && it.value in min..max
-                }.sortedByDescending { it.value }.takeIf { it.isNotEmpty() } ?: kotlin.run {
-                    val firstIndex = ceil(min / step).toInt()
-                    val lastIndex = floor(max / step).toInt()
-                    MutableList(size = lastIndex - firstIndex + 1) { index ->
-                        (step * (lastIndex - index)).sp
+            val max =
+                remember(maxTextSize, maxWidth, maxHeight) {
+                    min(maxWidth, maxHeight).value.let {
+                        it.takeIf { maxTextSize.isUnspecified }
+                            ?: maxTextSize.value.coerceAtMost(maximumValue = it)
                     }
                 }
-            }
 
-            var combinedTextStyle = LocalTextStyle.current + style.copy(
-                fontStyle = fontStyle ?: style.fontStyle,
-                fontWeight = fontWeight ?: style.fontWeight,
-                fontFamily = fontFamily ?: style.fontFamily,
-                letterSpacing = letterSpacing.takeIf { it.isSpecified } ?: style.letterSpacing,
-            )
+            val min =
+                remember(minTextSize, spPerPixel, max) {
+                    spPerPixel.takeIf { minTextSize.isUnspecified }
+                        ?: minTextSize.value.coerceIn(spPerPixel..max)
+                }
+
+            val step =
+                remember(stepGranularityTextSize, spPerPixel, max) {
+                    spPerPixel.takeIf { stepGranularityTextSize.isUnspecified }
+                        ?: stepGranularityTextSize.value.coerceIn(spPerPixel..max)
+                }
+
+            val candidateFontSizes =
+                remember(suggestedFontSizes, max, min, step) {
+                    suggestedFontSizes.value.filter {
+                        it.isSp && it.value in min..max
+                    }.sortedByDescending { it.value }.takeIf { it.isNotEmpty() } ?: kotlin.run {
+                        val firstIndex = ceil(min / step).toInt()
+                        val lastIndex = floor(max / step).toInt()
+                        MutableList(size = lastIndex - firstIndex + 1) { index ->
+                            (step * (lastIndex - index)).sp
+                        }
+                    }
+                }
+
+            var combinedTextStyle =
+                LocalTextStyle.current +
+                    style.copy(
+                        fontStyle = fontStyle ?: style.fontStyle,
+                        fontWeight = fontWeight ?: style.fontWeight,
+                        fontFamily = fontFamily ?: style.fontFamily,
+                        letterSpacing = letterSpacing.takeIf { it.isSpecified } ?: style.letterSpacing,
+                    )
 
             if (candidateFontSizes.isNotEmpty()) {
                 // Para-Dichotomous binary search
@@ -204,23 +207,29 @@ fun AutoSizeText(
                 while (low <= high) {
                     val mid = low + (high - low) / 2
                     val fontSize = candidateFontSizes[mid]
-                    val shouldShrink = shouldShrink(
-                        text = text,
-                        textStyle = combinedTextStyle.copy(
-                            fontSize = fontSize,
-                            lineHeight = fontSize * (1 + lineSpacingRatio),
-                        ),
-                        maxLines = maxLines,
-                    )
+                    val shouldShrink =
+                        shouldShrink(
+                            text = text,
+                            textStyle =
+                                combinedTextStyle.copy(
+                                    fontSize = fontSize,
+                                    lineHeight = fontSize * (1 + lineSpacingRatio),
+                                ),
+                            maxLines = maxLines,
+                        )
 
-                    if (shouldShrink) low = mid + 1
-                    else high = mid - 1
+                    if (shouldShrink) {
+                        low = mid + 1
+                    } else {
+                        high = mid - 1
+                    }
                 }
                 val electedFontSize = candidateFontSizes[low.coerceIn(candidateFontSizes.indices)]
-                combinedTextStyle = combinedTextStyle.copy(
-                    fontSize = electedFontSize,
-                    lineHeight = electedFontSize * (1 + lineSpacingRatio),
-                )
+                combinedTextStyle =
+                    combinedTextStyle.copy(
+                        fontSize = electedFontSize,
+                        lineHeight = electedFontSize * (1 + lineSpacingRatio),
+                    )
             }
 
             Text(
@@ -233,12 +242,13 @@ fun AutoSizeText(
                 fontFamily = fontFamily,
                 letterSpacing = letterSpacing,
                 textDecoration = textDecoration,
-                textAlign = when (alignment) {
-                    Alignment.TopStart, Alignment.CenterStart, Alignment.BottomStart -> TextAlign.Start
-                    Alignment.TopCenter, Alignment.Center, Alignment.BottomCenter -> TextAlign.Center
-                    // "else" means: Alignment.TopEnd, Alignment.CenterEnd, Alignment.BottomEnd -> TextAlign.End
-                    else -> TextAlign.End
-                },
+                textAlign =
+                    when (alignment) {
+                        Alignment.TopStart, Alignment.CenterStart, Alignment.BottomStart -> TextAlign.Start
+                        Alignment.TopCenter, Alignment.Center, Alignment.BottomCenter -> TextAlign.Center
+                        // "else" means: Alignment.TopEnd, Alignment.CenterEnd, Alignment.BottomEnd -> TextAlign.End
+                        else -> TextAlign.End
+                    },
                 overflow = TextOverflow.Visible,
                 maxLines = maxLines,
                 minLines = 1,
@@ -258,21 +268,23 @@ private fun BoxWithConstraintsScope.shouldShrink(
     textStyle: TextStyle,
     maxLines: Int,
 ): Boolean {
-    val textDelegate = TextDelegate(
-        text = text,
-        style = textStyle,
-        maxLines = maxLines,
-        minLines = 1,
-        softWrap = true,
-        overflow = TextOverflow.Visible,
-        density = LocalDensity.current,
-        fontFamilyResolver = LocalFontFamilyResolver.current,
-    )
+    val textDelegate =
+        TextDelegate(
+            text = text,
+            style = textStyle,
+            maxLines = maxLines,
+            minLines = 1,
+            softWrap = true,
+            overflow = TextOverflow.Visible,
+            density = LocalDensity.current,
+            fontFamilyResolver = LocalFontFamilyResolver.current,
+        )
 
-    val textLayoutResult = textDelegate.layout(
-        constraints = constraints,
-        layoutDirection = LocalLayoutDirection.current,
-    )
+    val textLayoutResult =
+        textDelegate.layout(
+            constraints = constraints,
+            layoutDirection = LocalLayoutDirection.current,
+        )
 
     return textLayoutResult.hasVisualOverflow
 }
@@ -285,4 +297,7 @@ data class ImmutableWrapper<T>(val value: T)
  */
 fun <T> T.toImmutableWrapper() = ImmutableWrapper(this)
 
-operator fun <T> ImmutableWrapper<T>.getValue(thisRef: Any?, property: KProperty<*>) = value
+operator fun <T> ImmutableWrapper<T>.getValue(
+    thisRef: Any?,
+    property: KProperty<*>,
+) = value
