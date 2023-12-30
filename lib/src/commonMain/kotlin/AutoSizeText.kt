@@ -1,5 +1,4 @@
-// LAST UPDATE: 27 december 2023
-package com.inidamleader.ovtracker.util.compose
+package com.dshatz.composempp
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -68,7 +67,7 @@ import kotlin.reflect.KProperty
  * @param maxLines The maximum number of lines for the text.
  * @param onTextLayout Callback invoked when the text layout is available.
  * @param style The base style to apply to the text.
- * @author Reda El Madini - For support, contact gladiatorkilo@gmail.com
+ * @author Reda El Madini - For support, contact gladiatorkilo@gmail.com or shatz.dan@gmail.com
  */
 @Composable
 fun AutoSizeText(
