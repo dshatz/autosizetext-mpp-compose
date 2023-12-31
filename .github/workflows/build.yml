@@ -1,12 +1,12 @@
 name: Build Multiplatform project
 on:
-  push:
-    branches:
-      - release/*
   pull_request:
-
+    types: [closed]
+    branches:
+      - 'release/*'
 jobs:
   build-multiplatform-project:
+    if: github.event.pull_request.merged == true
     environment: release
     strategy:
       fail-fast: false
