@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-multiplatform-project:
-    environment: production
+    environment: release
     strategy:
       fail-fast: false
       matrix:
@@ -23,7 +23,7 @@ jobs:
       - name: Build Multiplatform project
         shell: bash
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVENCENTRALPASSWORD }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVENCENTRALUSERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVENCENTRALUSERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVENCENTRALPASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNINGINMEMORYKEY }}
         run: ./gradlew lib:publishAllPublicationsToMavenCentralRepository
