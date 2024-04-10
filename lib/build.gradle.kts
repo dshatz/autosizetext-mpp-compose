@@ -95,7 +95,7 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
 
-    coordinates("com.dshatz.compose-mpp", "autosize-text", "1.0.1")
+    coordinates("com.dshatz.compose-mpp", "autosize-text", "1.0.2")
 
     pom {
         name.set(project.name)
