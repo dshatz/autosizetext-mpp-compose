@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import com.inidamleader.ovtracker.util.compose.AutoSizeText
+import com.dshatz.composempp.AutoSizeText
 
 @Composable
 fun App() {

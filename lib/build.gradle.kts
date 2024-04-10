@@ -1,5 +1,5 @@
 import com.vanniktech.maven.publish.SonatypeHost
-import java.util.*
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
     kotlin("multiplatform")
@@ -10,11 +10,26 @@ plugins {
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     androidTarget {
         publishLibraryVariants("release")
     }
 
     jvm("desktop")
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        moduleName = "autosizetext"
+        binaries.library()
+        binaries.executable()
+        browser()
+    }
+
+    /*js {
+        moduleName = "autosizetext"
+        binaries.library()
+    }*/
+
 
     listOf(
         iosX64(),
@@ -43,15 +58,14 @@ kotlin {
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-        }
         val desktopMain by getting {
             dependencies {
                 implementation(compose.uiTooling)
+            }
+        }
+        val wasmJsMain by getting {
+            dependencies {
+
             }
         }
     }
@@ -108,4 +122,8 @@ mavenPublishing {
             developerConnection.set("scm:git:ssh://git@github.com/dshatz/autosizetext-mpp-compose.git")
         }
     }
+}
+
+compose.experimental {
+    web.application {}
 }
