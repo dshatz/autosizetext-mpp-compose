@@ -21,14 +21,13 @@ kotlin {
     wasmJs {
         moduleName = "autosizetext"
         binaries.library()
-        binaries.executable()
         browser()
     }
-
-    /*js {
+    js {
         moduleName = "autosizetext"
         binaries.library()
-    }*/
+        browser()
+    }
 
 
     listOf(
@@ -95,7 +94,7 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
 
-    coordinates("com.dshatz.compose-mpp", "autosize-text", "1.0.2")
+    coordinates("com.dshatz.compose-mpp", "autosize-text", "1.0.3")
 
     pom {
         name.set(project.name)
